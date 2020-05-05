@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
 	php7.3 php7.3-fpm php7.3-mysql php-common php7.3-cli php7.3-common php7.3-json php7.3-opcache php7.3-readline \
         php7.3-mbstring
 
+# phpMyAdmin
 RUN apt-get install -y wget
 RUN wget https://files.phpmyadmin.net/phpMyAdmin/4.9.0.1/phpMyAdmin-4.9.0.1-all-languages.tar.gz
 RUN tar -zxvf phpMyAdmin-4.9.0.1-all-languages.tar.gz 
@@ -25,7 +26,15 @@ RUN mkdir /usr/share/nginx/html/phpMyAdmin/tmp
 RUN chmod 777 /usr/share/nginx/html/phpMyAdmin/tmp
 RUN chown -R www-data:www-data /usr/share/nginx/html/phpMyAdmin
 
-
+# wordpress
+RUN wget https://wordpress.org/wordpress-5.4.1.tar.gz
+RUN tar -zxvf wordpress-5.4.1.tar.gz 
+RUN mv wordpress /usr/share/nginx/html/wordpress
+COPY srcs/wp-config.php /usr/share/nginx/html/wordpress/wp-config.php
+RUN service mysql start \
+	&& echo "CREATE DATABASE wordpress;" | mysql \	
+	&& echo "GRANT ALL PRIVILEGES ON wordpress.* TO 'wordpress_user'@'localhost' IDENTIFIED BY '1111';" | mysql \
+	&& echo "FLUSH PRIVILEGES;" | mysql
 
 COPY srcs/nginx.conf /etc/nginx/nginx.conf
 COPY srcs/default.conf /etc/nginx/conf.d/default.conf
